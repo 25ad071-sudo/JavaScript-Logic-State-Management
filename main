@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>To-Do List</h1>
+
+    <form id="todo-form">
+        <input
+            type="text"
+            id="todo-input"
+            placeholder="Add a task..."
+            required
+        >
+        <button type="submit">Add</button>
+    </form>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="active">Active</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+
+    <ul id="todo-list"></ul>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+.container {
+    width: 500px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+form {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+}
+
+button {
+    padding: 10px;
+    cursor: pointer;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+}
+
+.completed .task-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.filters {
+    margin: 15px 0;
+}
+
+.filter-btn.active {
+    background: #333;
+    color: white;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+Application State
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
+
+let currentFilter = "all";
+Each task object:
+{
+  id: 123456,
+  text: "Learn JavaScript",
+  completed: false
+}
+
+const form = document.getElementById("todo-form");
+const input = document.getElementById("todo-input");
+const list = document.getElementById("todo-list");
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+function saveTodos() {
+    localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+The UI should always be generated from the current state.
+function renderTodos() {
+    list.innerHTML = "";
+
+    let filteredTodos = todos;
+
+    if (currentFilter === "active") {
+        filteredTodos = todos.filter(todo => !todo.completed);
+    }
+
+    if (currentFilter === "completed") {
+        filteredTodos = todos.filter(todo => todo.completed);
+    }
+
+    filteredTodos.forEach(todo => {
+        const li = document.createElement("li");
+
+        li.className = todo.completed ? "completed" : "";
+
+        li.innerHTML = `
+            <span class="task-text">${todo.text}</span>
+
+            <div class="actions">
+                <button data-action="toggle" data-id="${todo.id}">
+                    ✓
+                </button>
+
+                <button data-action="edit" data-id="${todo.id}">
+                    Edit
+                </button>
+
+                <button data-action="delete" data-id="${todo.id}">
+                    Delete
+                </button>
+            </div>
+        `;
+
+        list.appendChild(li);
+    });
+}
+)
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const newTodo = {
+        id: Date.now(),
+        text,
+        completed: false
+    };
+
+    todos.push(newTodo);
+
+    saveTodos();
+    renderTodos();
+
+    input.value = "";
+});
+
+Instead of adding listeners to every button, use one listener on the parent list.
+list.addEventListener("click", (e) => {
+
+    const action = e.target.dataset.action;
+    const id = Number(e.target.dataset.id);
+
+    if (!action) return;
+
+    if (action === "delete") {
+        deleteTodo(id);
+    }
+
+    if (action === "toggle") {
+        toggleTodo(id);
+    }
+
+    if (action === "edit") {
+        editTodo(id);
+    }
+});
+
+function deleteTodo(id) {
+    todos = todos.filter(todo => todo.id !== id);
+
+    saveTodos();
+    renderTodos();
+}
+
+function toggleTodo(id) {
+
+    todos = todos.map(todo =>
+        todo.id === id
+            ? { ...todo, completed: !todo.completed }
+            : todo
+    );
+
+    saveTodos();
+    renderTodos();
+}
+
+function editTodo(id) {
+
+    const todo = todos.find(todo => todo.id === id);
+
+    const newText = prompt("Edit Task:", todo.text);
+
+    if (!newText || !newText.trim()) return;
+
+    todo.text = newText.trim();
+
+    saveTodos();
+    renderTodos();
+}
+
+filterButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        filterButtons.forEach(btn =>
+            btn.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        currentFilter = button.dataset.filter;
+
+        renderTodos();
+    });
+
+});
+
+Render tasks from Local Storage when the page loads.
+renderTodos();
